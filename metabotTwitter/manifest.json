@@ -8,6 +8,11 @@
 	"content_scripts": [
 	  {
 		"matches": ["https://*.twitter.com/*"],
+		"css": [
+			"styles/metabot-main.css",
+			"styles/metabot-light.css",
+			"styles/metabot-dark.css"
+		],
 		"js": [
 			"purify.min.js",
 			"flags.js",

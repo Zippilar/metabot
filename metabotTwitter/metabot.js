@@ -1,12 +1,19 @@
 // import { fillTemplate } from './common.js';
 
 
-function setStyle(divElement, style)
+function setStyle(divElement, style) //TO DELETE
 {
 	divElement.innerHTML = '<style>'+style+'</style>'
 }
 
-function addStyle(s)
+function setCss(name) {
+
+	var body = document.body;
+
+	body.classList.add(name);
+}
+
+function addStyle(s) //TO DELETE
 {
 	var d = document.createElement('div')
 	
@@ -20,12 +27,13 @@ function addStyle(s)
 // добавляем стили для пометки ботов
 
 // reduced-contrast style for tweet bodies posted by bots
-s = '.bot_tweet_highlight .bot_text { color: #808080; }'
-addStyle(s)
+// Removed to CSS-files, TO DELETE
+// s = '.bot_tweet_highlight .bot_text { color: #808080; }'
+// addStyle(s)
 
 
 // стиль для пометки красноватым фоном твитов от ботов
-tweetBackgroundStyle=addStyle()
+//tweetBackgroundStyle=addStyle() // Old styling, TO DELETE
 
 function defineTweetBackgroundStyle()
 {
@@ -38,12 +46,16 @@ function defineTweetBackgroundStyle()
 	else  // likely desktop mode, old design
 		dark_mode = getInitData()["night_mode_activated"] ? true : false
 
-	if (dark_mode)
-		var s = '.bot_tweet_highlight { background: #4b3333 !important; }'	// dark
-	else
-		var s = '.bot_tweet_highlight { background: #FEE !important; }'		// light
+	if (dark_mode) {
+		var s = 'dark_metabot';	// dark
 
-	setStyle(tweetBackgroundStyle, s)
+	}
+	else {
+		var s = 'light_metabot';
+	}
+	
+	//setStyle(tweetBackgroundStyle, s) //old styling, TO DELETE
+	setCss(s);
 }
 
  
@@ -238,6 +250,25 @@ function expandDynamicallyAppearingDropdownMenu()
 	setTimeout(expandDynamicallyAppearingDropdownMenu, 1000);
 }
 
+function highlight(word, el) {
+	el.classList.add('bot_tweet_highlight');
+
+	var headings = document.evaluate("//span[contains(., '" + word + "')]", el, null, XPathResult.ANY_TYPE, null ); //All spans with text upwards
+	//Only spans containing text directly "//span[text()[contains(., '" + word + "')]]"
+	var thisHeading = headings.iterateNext();
+	var elems = [];
+
+	while (thisHeading) {
+		elems.push(thisHeading);
+		thisHeading = headings.iterateNext();
+	}
+
+	if(elems.length > 0) {
+		for(let i = 0; i < elems.length; i++) {
+			elems[i].classList.add('bot_nick_highlight');
+		}
+	}
+}
 
 function markTweets()
 {
@@ -258,16 +289,17 @@ function markTweets()
 			var a=document.querySelectorAll('div.stream div.tweet')
 				// get all tweets on user profile page for old design, desktop
 			mobile_mode=false
-			highlight_tweets=false
+			highlight_tweets=true
 		}
+
 		if (a.length==0)
 		{
 			mobile_mode=true
-			a=document.querySelectorAll('article[role=article]');
+			a=document.querySelectorAll('article[role=article]')
 			// In conversation view, works both for focused tweet and
 			// for parent / child replies of the focused tweet.
 				
-			highlight_tweets=isStatusView()
+			highlight_tweets=true //isStatusView() // highlight anyway
 		}
 	
 
@@ -309,31 +341,7 @@ function markTweets()
 						t.parentNode :
 						t
 
-					if (elementToHightlight.
-						querySelector(
-						":scope > article > div > div")
-						.innerText=="" )
-					// Highlight tweets only if they are not retweeted-by, no matter who retweeted or who posted the original tweet.
-					{
-						// подсвечиваем весь твит стилем bot_tweet_highlight
-						elementToHightlight.className+=" bot_tweet_highlight"
-
-						// reduce contrast for tweet text
-						tweetTextselector = mobile_mode ?
-							// - for focused tweet:
-							':scope > div > div > span' + ', ' +
-							// - for parent / child replies of the focused tweet
-							':scope > div > div > div > div > span'
-							:
-							// for desktop, old design
-							'div.js-tweet-text-container p.tweet-text'
-
-						tweetTxts = t.querySelectorAll(tweetTextselector)
-						tweetTxts.forEach(
-							function(element) {
-								element.className='bot_text ' + element.className;
-							});						
-					}			
+					highlight(x, elementToHightlight);		
 				}
 		
 		
